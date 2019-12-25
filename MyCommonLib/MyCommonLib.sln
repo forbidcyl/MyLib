@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonLib", "CommonLib\Comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTest", "ConsoleTest\ConsoleTest.csproj", "{71CCFF56-261D-4296-8B8F-BD13C2A2461E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintWebAPI", "PrintWebAPI\PrintWebAPI.csproj", "{A4667FDF-1894-4638-B63B-D0EBF6479F06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console_WebapiStart", "Console_WebapiStart\Console_WebapiStart.csproj", "{11237388-C73B-4532-9D0F-DBA83B920CB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{71CCFF56-261D-4296-8B8F-BD13C2A2461E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71CCFF56-261D-4296-8B8F-BD13C2A2461E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71CCFF56-261D-4296-8B8F-BD13C2A2461E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4667FDF-1894-4638-B63B-D0EBF6479F06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4667FDF-1894-4638-B63B-D0EBF6479F06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4667FDF-1894-4638-B63B-D0EBF6479F06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4667FDF-1894-4638-B63B-D0EBF6479F06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11237388-C73B-4532-9D0F-DBA83B920CB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11237388-C73B-4532-9D0F-DBA83B920CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11237388-C73B-4532-9D0F-DBA83B920CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11237388-C73B-4532-9D0F-DBA83B920CB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
