@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -13,6 +16,9 @@ namespace Console_WebapiStart
 {
     class Program
     {
+
+        private static ConcurrentBag<string> ipAddress = new ConcurrentBag<string>();
+
         static void Main(string[] args)
         {
             try
@@ -23,15 +29,23 @@ namespace Console_WebapiStart
                 //thread.IsBackground = true;
                 //thread.Start(client);
 
-                GetAvailablePrinters();
+                //GetAvailablePrinters();
 
-
+                //ipAddress.Add("localhost");
+                //Start_SharedHost();
                 //var ips = GetLocalIpAddress("InterNetwork");
                 //foreach (var item in ips)
                 //{
                 //    Console.WriteLine(item.ToString());
                 //}
                 //Console.ReadKey();
+
+                Console.WriteLine(Environment.CurrentDirectory+ @"\PrintTemplate");
+
+                //var ss = CommonLib.AESHelper.Decrypt("geOZH9PFkBamDSYwC0fpaD2Sah2WFTP1Lx/j1v1y7d4MBtRea4eMcM8l6BH6djYRso1FnWdDpAMIzBl3leIxgSgpYxfCeBcuVEI5iNWZwPZS2R4EwlOvyNN44pzpYjtNx4euwHck4YpO34nBXcO0orBliTOc4ebIV7T5g7cOkKChvzeI9TQo7Wiehmh/ApSeFJi3/rFhV0HrKQy5UGizm66SrKOlATpV0OgX7tvT7ew=Tjubxx1GGQO5Jrxbjiz3ysRC2P2fgq81RlmmZV4Ytb+HxG/UypztNf6/G+a1zwQkKBHcJCjnvJFtUz59yGrsvWgg+SWNr3STFvxaVDltKw==");
+                //Console.WriteLine(ss);
+                //Console.WriteLine(System.IO.Directory.GetCurrentDirectory());
+
             }
             catch (Exception ex)
             {
@@ -39,6 +53,64 @@ namespace Console_WebapiStart
             }
             Console.ReadKey();
         }
+
+
+        /// <summary>
+        /// 访问远程共享主机
+        /// </summary>
+        private static void Start_SharedHost()
+        {
+            Thread remoteHostAccessThread = new Thread(async () =>
+            {
+                while (true)
+                {
+                    foreach (var ip in ipAddress)
+                    {
+                        if (!string.IsNullOrEmpty(ip))
+                        {
+                            try
+                            {
+                                using (HttpClient client = new HttpClient())
+                                {
+                                    try
+                                    {
+                                        client.BaseAddress = new Uri($"http://{ip}:36172");
+                                        client.Timeout = TimeSpan.FromSeconds(5);
+                                        var response = await client.GetAsync("api/Print/GetPrinterShareds");
+
+                                        if (!response.IsSuccessStatusCode || response.StatusCode != HttpStatusCode.OK)
+                                            throw new Exception($"请求失败，错误：StatusCode:{response.StatusCode};Content:{await response.Content.ReadAsStringAsync()}");
+
+                                        var responseContent = JsonConvert.DeserializeObject<PrintSharedResponseModel>(await response.Content.ReadAsStringAsync());
+
+                                        if (responseContent != null)
+                                            responseContent.SharedPrinters.ForEach(r => Console.WriteLine(r));
+                                    }
+                                    catch (HttpRequestException e)
+                                    {
+                                        // Console.WriteLine(e.)
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine(ex.GetType().Name);
+                                        throw ex;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                            await Task.Delay(1000);
+                        }
+                    }
+                }
+            });
+
+            remoteHostAccessThread.IsBackground = true;
+            remoteHostAccessThread.Start();
+        }
+
 
         /// <summary>
         /// 接受UDP广播发送的消息
@@ -48,6 +120,7 @@ namespace Console_WebapiStart
         {
             UdpClient client = obj as UdpClient;
             IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, 0);
+            object states = new object();
             while (true)
             {
                 client.BeginReceive(delegate (IAsyncResult result)
@@ -56,7 +129,15 @@ namespace Console_WebapiStart
                     {
                         var encryptString = result.AsyncState.ToString();
                         Console.WriteLine(encryptString);//委托接收消息
-                        Console.WriteLine($"解密后信息：{CommonLib.AESHelper.Decrypt(encryptString)}");
+                        var decryptString = CommonLib.AESHelper.Decrypt(encryptString);
+                        Console.WriteLine($"解密后信息：{decryptString}");
+
+                        var test = JsonConvert.DeserializeObject<Test>(decryptString);
+                        if (test != null)
+                        {
+                            Console.WriteLine(test.Action);
+                        }
+                        Console.WriteLine("IP地址：" + endpoint.Address.ToString());
                     }
                     catch (Exception ex)
                     {
@@ -64,7 +145,7 @@ namespace Console_WebapiStart
                     }
                 }, Encoding.UTF8.GetString(client.Receive(ref endpoint)));
 
-                Console.WriteLine("IP地址：" + endpoint.Address.ToString());
+
             }
         }
 
@@ -159,5 +240,32 @@ namespace Console_WebapiStart
             }
             return IPList;
         }
+    }
+
+    public class Test
+    {
+        public string Action { get; set; }
+
+        public DateTime Time { get; set; }
+    }
+
+
+
+    public class BasePrintSharedResponseModel
+    {
+        public int ResultCode { get; set; }
+
+        public string ResultMessage { get; set; }
+    }
+
+    /// <summary>
+    /// 打印机响应模板类
+    /// </summary>
+    public class PrintSharedResponseModel : BasePrintSharedResponseModel
+    {
+        /// <summary>
+        /// 本地可用的打印机
+        /// </summary>
+        public List<string> SharedPrinters { get; set; }
     }
 }
