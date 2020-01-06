@@ -74,6 +74,7 @@
     <Compile Include="WebAPI\Controller\TestController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebAPI\WebApiActivator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -91,6 +92,9 @@
       <Project>{b27ecee6-6a8a-441c-8da6-f767d371b7f0}</Project>
       <Name>CommonLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Transmission\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

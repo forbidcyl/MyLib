@@ -24,10 +24,10 @@
 
 /*
 *┌────────────────────────────────────────────────┐
-*│　描    述：WebApiConfig                  |                                  
+*│　描    述：WebApiActivator                  |                                  
 *│　作    者：cyl                                 |            
 *│　版    本：1.0                                 |             
-*│　创建时间：2019/12/24 16:55:34                        	  |
+*│　创建时间：2020/1/6 17:35:54                        	  |
 *└────────────────────────────────────────────────┘
 */
 
@@ -36,25 +36,55 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http;
+using System.Web.Http.SelfHost;
 
-namespace Console_WebapiStart.App_Start
+namespace Console_WebapiStart.WebAPI
 {
-    public static class WebApiConfig
+
+    /// <summary>
+    /// webapi
+    /// </summary>
+    public class WebApiActivator
     {
-        public static System.Web.Http.SelfHost.HttpSelfHostConfiguration Register(System.Web.Http.SelfHost.HttpSelfHostConfiguration config)
+        private static HttpSelfHostServer _webapi_server;
+        private static bool _is_serverStarted = false;
+
+        /// <summary>
+        /// webapi服务是否开启
+        /// </summary>
+        public static bool IsServerStarted { get { return IsServerStarted; } private set { } }
+
+        /// <summary>
+        /// WebApi服务开启
+        /// </summary>
+        /// <returns></returns>
+        public static async Task ServerOpenAsync()
         {
-            // Web API 配置和服务
+            if (_is_serverStarted)
+                return;
 
-            // Web API 路由
-            config.MapHttpAttributeRoutes();
+            _webapi_server =
+                new HttpSelfHostServer(Console_WebapiStart.App_Start.WebApiConfig.Register(new HttpSelfHostConfiguration("http://localhost:1234")));
 
-            config.Routes.MapHttpRoute(name: "DefaultApi",
-                                      routeTemplate: "api/{controller}/{action}/{id}",
-                                      defaults: new { id = RouteParameter.Optional });
-            config.MaxBufferSize = 999999;
-            config.MaxReceivedMessageSize = 999999;
-            return config;
+            await _webapi_server.OpenAsync();
+
+            _is_serverStarted = !_is_serverStarted;
+        }
+
+        /// <summary>
+        /// WebApi服务关闭
+        /// </summary>
+        /// <returns></returns>
+        public static async Task ServerCloseAsync()
+        {
+            if (!_is_serverStarted)
+                return;
+
+            await _webapi_server.CloseAsync();
+
+            _is_serverStarted = !_is_serverStarted;
+
+            _webapi_server.Dispose();
         }
     }
 }

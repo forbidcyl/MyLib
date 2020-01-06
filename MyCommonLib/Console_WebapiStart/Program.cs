@@ -23,11 +23,11 @@ namespace Console_WebapiStart
         {
             try
             {
-                //UdpClient client = new UdpClient(new IPEndPoint(IPAddress.Any, 36172));
+                UdpClient client = new UdpClient(new IPEndPoint(IPAddress.Any, 36172));
 
-                //Thread thread = new Thread(receiveUdpMsg);//用线程接收，避免UI卡住
-                //thread.IsBackground = true;
-                //thread.Start(client);
+                Thread thread = new Thread(receiveUdpMsg);//用线程接收，避免UI卡住
+                thread.IsBackground = true;
+                thread.Start(client);
 
                 //GetAvailablePrinters();
 
@@ -144,8 +144,6 @@ namespace Console_WebapiStart
                         Console.WriteLine(ex.Message);
                     }
                 }, Encoding.UTF8.GetString(client.Receive(ref endpoint)));
-
-
             }
         }
 
@@ -158,53 +156,6 @@ namespace Console_WebapiStart
             foreach (var item in printers)
             {
                 Console.WriteLine(item.ToString());
-            }
-        }
-
-        /// <summary>
-        /// webapi
-        /// </summary>
-        public class WebApiActivator
-        {
-            private static HttpSelfHostServer _webapi_server;
-            private static bool _is_serverStarted = false;
-
-            /// <summary>
-            /// webapi服务是否开启
-            /// </summary>
-            public static bool IsServerStarted { get { return IsServerStarted; } private set { } }
-
-            /// <summary>
-            /// WebApi服务开启
-            /// </summary>
-            /// <returns></returns>
-            public static async Task ServerOpenAsync()
-            {
-                if (_is_serverStarted)
-                    return;
-
-                _webapi_server =
-                    new HttpSelfHostServer(Console_WebapiStart.App_Start.WebApiConfig.Register(new HttpSelfHostConfiguration("http://localhost:1234")));
-
-                await _webapi_server.OpenAsync();
-
-                _is_serverStarted = !_is_serverStarted;
-            }
-
-            /// <summary>
-            /// WebApi服务关闭
-            /// </summary>
-            /// <returns></returns>
-            public static async Task ServerCloseAsync()
-            {
-                if (!_is_serverStarted)
-                    return;
-
-                await _webapi_server.CloseAsync();
-
-                _is_serverStarted = !_is_serverStarted;
-
-                _webapi_server.Dispose();
             }
         }
 
